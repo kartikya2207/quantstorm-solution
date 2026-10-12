@@ -21,3 +21,7 @@ vedant_v1.py
 competitor_b_v1.py
 # unrelated company presentation that ended up in this folder
 mapletree.pdf
+
+# Secrets
+.env*
+!.env.example
