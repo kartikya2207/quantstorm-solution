@@ -1,0 +1,51 @@
+Good find. Two things: build the fix, and check his bug.
+
+=== PART 1: build and test the Taker fix ===
+Create ./work/H4_takerfix.py = exact copy of H3_tight.py with the single change:
+    if best_acc >= max(ev_force, 0.0) + ACCEPT_MARGIN:   # old
+    if best_acc >= max(ev_force, ACCEPT_MARGIN):         # new
+Nothing else changes. Confirm by AST diff that this is the only difference.
+
+Test it against the SAME bar every other change had to clear:
+- paired vs H3, 60 seeds, on the 12-bot field: report mean diff and CI
+- paired vs H3, 60 seeds, on the 7-bot herd: report mean diff and CI
+- safety check with CIs vs f13_defender, h4_honest, h6, h7, f06, f14, x1, x2 —
+  fail if any is worse than H3 by more than 5
+- head-to-head vs vedant, 100 paired seeds, H4 and H3 on identical seeds
+
+Also confirm the diagnosis directly: instrument or trace how many times per match
+H3 takes the counter branch in the band ev_force <= best_acc < ev_force + 0.5, and
+what the realised PnL of those decisions was versus accepting. I want to see the
+bug's actual cost, not just infer it.
+
+=== PART 2: does his width-0 bug help us? ===
+His final-turn counter is ("COUNTER", ask, ask) with a comment saying sub-floor
+counters are legal — pre-patch logic. Post-patch the engine clamps it to floor width
+and re-centres, so he fills near ask - floor/2 rather than ask, and he prices the
+fill wrong by 1-2 ticks.
+
+Answer two things, DO NOT build yet:
+(a) Does this mean that when we are Maker and he rides to turn 6, the fill lands
+    somewhere we can predict better than he can? Is there a quote centre or width
+    that turns his mispricing into our gain? Show the algebra.
+(b) Is any such exploit specific to HIM, or does it generalise to the whole class of
+    bots written against the pre-patch rules — which, given the patch landed at
+    8:55 PM, could be a large share of the field?
+If (b) is yes and the exploit is simple, propose it with expected cost elsewhere and
+wait for my go-ahead. If it only works against him, say so and drop it.
+
+=== PART 3: selection ===
+Finish the round robin with vedant included and report the full ranking. Then re-run
+it with H4 added if H4 cleared Part 1.
+
+DECISION RULE — unchanged: H4 replaces H3 only if it beats H3 on the field with a
+paired 95% CI excluding zero, AND is not worse than H3 by more than 5 against any
+opponent class including the defender and h4_honest. If it fails, H3 ships as is.
+Note the three prior margin-loosenings (C2 -0.94*, B1 -0.47*, B3 -0.71*) all failed
+this bar — treat this one with the same suspicion, no benefit of the doubt.
+
+If H4 wins: repackage FINAL_SUBMISSION.py from H4 and re-run every final check
+(validate, isolate parity, timing, RNG audit, 100-seed stability vs h5/h6/f13/vedant),
+then print the first 20 lines.
+
+Report Parts 1 and 3 before building anything from Part 2.

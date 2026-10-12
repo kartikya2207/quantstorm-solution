@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Tool / editor
+.claude/
+.aider*
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Not mine to publish:
+# another participant's bot that was shared with me for testing, and an empty placeholder for it
+vedant_v1.py
+competitor_b_v1.py
+# unrelated company presentation that ended up in this folder
+mapletree.pdf
